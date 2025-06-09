@@ -4,6 +4,7 @@ import { SearchBar } from './SearchBar';
 import { BubbleMap } from './BubbleMap';
 import { TokenData } from '../types';
 import { mockTokenData } from '../data/mockData';
+import { moon, stars } from 'lucide-react';
 
 export const WalletBubbleMap: React.FC = () => {
   const [tokenData, setTokenData] = useState<TokenData | null>(null);
@@ -24,11 +25,11 @@ export const WalletBubbleMap: React.FC = () => {
       if (data) {
         setTokenData(data);
       } else {
-        setError(`Token "${symbol}" not found. Try SHIB or SUI.`);
+        setError(`Token "${symbol}" not found in the cosmic void. Try SHIB or SUI.`);
         setTokenData(null);
       }
     } catch (err) {
-      setError('Failed to fetch token data. Please try again.');
+      setError('Connection to the cosmic network failed. Please try again.');
       setTokenData(null);
     } finally {
       setIsLoading(false);
@@ -36,16 +37,20 @@ export const WalletBubbleMap: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-6 relative z-10">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            Sui Token Wallet Map
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <moon className="w-8 h-8 text-slate-300" />
+            <h1 className="text-4xl font-bold text-slate-100 bg-gradient-to-r from-slate-200 via-indigo-200 to-slate-300 bg-clip-text text-transparent">
+              Lunar Token Observatory
+            </h1>
+            <stars className="w-8 h-8 text-slate-300" />
+          </div>
           <p className="text-slate-300 text-lg max-w-2xl mx-auto">
-            Visualize token distribution across wallet holders. Search for any Sui token 
-            to see the network of holders and their connections.
+            Explore the cosmic distribution of tokens across the digital universe. 
+            Navigate through wallet constellations and discover the celestial holders.
           </p>
         </div>
 
@@ -56,8 +61,8 @@ export const WalletBubbleMap: React.FC = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 mb-6 text-center">
-            <div className="text-red-400 font-medium">{error}</div>
+          <div className="bg-red-950/30 border border-red-800/50 rounded-lg p-4 mb-6 text-center backdrop-blur-sm">
+            <div className="text-red-300 font-medium">{error}</div>
           </div>
         )}
 
@@ -65,8 +70,11 @@ export const WalletBubbleMap: React.FC = () => {
         {isLoading && (
           <div className="flex justify-center items-center h-96">
             <div className="text-center">
-              <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <div className="text-slate-300">Loading token data...</div>
+              <div className="relative w-8 h-8 mx-auto mb-4">
+                <div className="w-8 h-8 border-2 border-slate-300/30 border-t-slate-300 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 w-8 h-8 border-2 border-transparent border-b-indigo-300/50 rounded-full animate-spin animation-delay-75"></div>
+              </div>
+              <div className="text-slate-300">Scanning the cosmic network...</div>
             </div>
           </div>
         )}
@@ -80,20 +88,23 @@ export const WalletBubbleMap: React.FC = () => {
             />
             
             {/* Legend */}
-            <div className="bg-slate-800/30 border border-slate-700 rounded-lg p-4">
-              <h3 className="text-white font-semibold mb-3">How to use:</h3>
+            <div className="bg-slate-900/40 border border-slate-700/50 rounded-lg p-4 backdrop-blur-sm">
+              <h3 className="text-slate-200 font-semibold mb-3 flex items-center gap-2">
+                <stars className="w-4 h-4" />
+                Navigation Guide:
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-300">
                 <div>
-                  <strong className="text-cyan-400">• Click bubbles</strong> to view wallet details
+                  <strong className="text-indigo-300">• Click celestial bodies</strong> to view wallet details
                 </div>
                 <div>
-                  <strong className="text-cyan-400">• Scroll</strong> to zoom in/out
+                  <strong className="text-indigo-300">• Scroll</strong> to zoom through space
                 </div>
                 <div>
-                  <strong className="text-cyan-400">• Drag</strong> to pan around the map
+                  <strong className="text-indigo-300">• Drag</strong> to navigate the cosmos
                 </div>
                 <div>
-                  <strong className="text-cyan-400">• Lines</strong> show wallet connections
+                  <strong className="text-indigo-300">• Constellation lines</strong> show wallet connections
                 </div>
               </div>
             </div>
@@ -103,19 +114,24 @@ export const WalletBubbleMap: React.FC = () => {
         {/* Demo Instructions */}
         {!tokenData && !isLoading && !error && (
           <div className="text-center text-slate-400 mt-12">
-            <div className="text-lg mb-4">Try searching for:</div>
+            <div className="text-lg mb-4 flex items-center justify-center gap-2">
+              <moon className="w-5 h-5" />
+              Begin your cosmic journey:
+            </div>
             <div className="flex justify-center gap-4">
               <button
                 onClick={() => handleSearch('SHIB')}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded 
-                           border border-slate-600 transition-colors"
+                className="px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-indigo-300 rounded-lg 
+                           border border-slate-600/50 transition-all duration-300 hover:border-indigo-400/50
+                           backdrop-blur-sm hover:shadow-lg hover:shadow-indigo-500/20"
               >
                 SHIB
               </button>
               <button
                 onClick={() => handleSearch('SUI')}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-400 rounded 
-                           border border-slate-600 transition-colors"
+                className="px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-indigo-300 rounded-lg 
+                           border border-slate-600/50 transition-all duration-300 hover:border-indigo-400/50
+                           backdrop-blur-sm hover:shadow-lg hover:shadow-indigo-500/20"
               >
                 SUI
               </button>
