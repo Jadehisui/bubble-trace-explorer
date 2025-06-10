@@ -24,7 +24,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, isLoading }) => 
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Enter cosmic token symbol (e.g., SHIB, SUI)"
+          placeholder="Enter cosmic token symbol (e.g., LOFI, SUI)"
           className="w-full px-4 py-3 pl-12 bg-slate-900/50 border border-slate-600/50 rounded-lg 
                      text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 
                      focus:ring-indigo-400/50 focus:border-indigo-400/50 transition-all duration-200

@@ -1,10 +1,9 @@
-
 import { TokenData } from '../types';
 
 export const mockTokenData: Record<string, TokenData> = {
-  'SHIB': {
-    symbol: 'SHIB',
-    name: 'Shiba Inu',
+  'LOFI': {
+    symbol: 'LOFI',
+    name: 'LOFI Token',
     wallets: [
       {
         id: '1',
