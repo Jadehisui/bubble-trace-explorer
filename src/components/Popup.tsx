@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { PopupData } from '../types';
-import { moon } from 'lucide-react';
+import { Moon } from 'lucide-react';
 
 interface PopupProps {
   popup: PopupData;
@@ -40,7 +39,7 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
           {popup.wallet.tag && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <moon className="w-4 h-4 text-indigo-300" />
+                <Moon className="w-4 h-4 text-indigo-300" />
                 <span className="text-indigo-300 font-medium text-sm">
                   {popup.wallet.tag}
                 </span>
