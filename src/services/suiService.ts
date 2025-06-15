@@ -1,4 +1,5 @@
 
+
 import { SuiClient, getFullnodeUrl } from '@mysten/sui.js/client';
 
 const suiClient = new SuiClient({
@@ -104,3 +105,4 @@ export const formatBalance = (balance: string, decimals: number): string => {
   
   return trimmedFractional ? `${wholePart}.${trimmedFractional}` : wholePart.toString();
 };
+
