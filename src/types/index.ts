@@ -3,6 +3,8 @@ export interface Wallet {
   id: string;
   address: string;
   percentage: number;
+  balance?: string;
+  formattedBalance?: string;
   tag?: string;
   x: number;
   y: number;
@@ -12,6 +14,9 @@ export interface Wallet {
 export interface TokenData {
   symbol: string;
   name: string;
+  decimals?: number;
+  totalSupply?: string;
+  coinType?: string;
   wallets: Wallet[];
 }
 
