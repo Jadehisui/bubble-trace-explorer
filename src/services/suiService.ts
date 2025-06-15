@@ -1,6 +1,5 @@
 
 import { SuiClient, getFullnodeUrl } from '@mysten/sui.js/client';
-import { CoinBalance } from '@mysten/sui.js/dist/cjs/types';
 
 const suiClient = new SuiClient({
   url: getFullnodeUrl('mainnet'),
