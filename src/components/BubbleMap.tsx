@@ -86,8 +86,8 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({ wallets, tokenSymbol }) =>
     return (
       <div className="flex items-center justify-center h-96 text-slate-400">
         <div className="text-center">
-          <div className="text-lg mb-2">No cosmic data available</div>
-          <div className="text-sm">Search for a token to explore the stellar network</div>
+          <div className="text-lg mb-2">No holder data available</div>
+          <div className="text-sm">Search for a token to explore the holder network</div>
         </div>
       </div>
     );
@@ -111,7 +111,7 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({ wallets, tokenSymbol }) =>
       <div className="absolute top-4 left-4 z-10">
         <div className="bg-slate-900/80 backdrop-blur-sm px-3 py-2 rounded border border-slate-600/50">
           <div className="text-indigo-300 font-bold">{tokenSymbol}</div>
-          <div className="text-slate-300 text-sm">{wallets.length} cosmic holders</div>
+          <div className="text-slate-300 text-sm">{wallets.length} holders</div>
         </div>
       </div>
 

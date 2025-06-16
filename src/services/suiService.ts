@@ -11,13 +11,6 @@ export interface TokenHolder {
   percentage: number;
 }
 
-export interface TransactionSender {
-  address: string;
-  totalAmount: string;
-  transactionCount: number;
-  percentage: number;
-}
-
 export interface TokenInfo {
   symbol: string;
   name: string;
@@ -54,18 +47,21 @@ export const getTokenInfo = async (coinType: string): Promise<TokenInfo> => {
   }
 };
 
-export const getTransactionSenders = async (
-  toAddress: string, 
+export const getTokenHolders = async (
   coinType: string, 
   limit: number = 50
-): Promise<TransactionSender[]> => {
+): Promise<TokenHolder[]> => {
   try {
-    console.log('Fetching transactions for address:', toAddress, 'coin type:', coinType);
+    console.log('Fetching holders for coin type:', coinType);
     
-    // Query transaction blocks with ToAddress filter
+    // Get recent transactions to find holders
     const transactions = await suiClient.queryTransactionBlocks({
       filter: {
-        ToAddress: toAddress
+        MoveFunction: {
+          package: coinType.split('::')[0],
+          module: coinType.split('::')[1],
+          function: null
+        }
       },
       options: {
         showInput: true,
@@ -73,73 +69,62 @@ export const getTransactionSenders = async (
         showEffects: true,
         showBalanceChanges: true,
       },
-      limit: 200, // Fetch more to get better data
+      limit: 200,
     });
 
     console.log('Found transactions:', transactions.data.length);
 
-    // Process transactions to find coin transfers
-    const senderMap = new Map<string, { amount: bigint; count: number }>();
+    // Process transactions to find holders
+    const holderMap = new Map<string, bigint>();
     
     for (const tx of transactions.data) {
       if (!tx.balanceChanges) continue;
       
       // Look for balance changes involving our coin type
       for (const change of tx.balanceChanges) {
-        if (change.coinType === coinType && 
-            change.owner === toAddress && 
-            BigInt(change.amount) > 0) {
+        if (change.coinType === coinType && BigInt(change.amount) > 0) {
+          const owner = typeof change.owner === 'object' && 'AddressOwner' in change.owner 
+            ? change.owner.AddressOwner 
+            : change.owner;
           
-          // Find the sender (should be in transaction inputs or from other balance changes)
-          const sender = tx.transaction?.data.sender;
-          if (sender && sender !== toAddress) {
-            const current = senderMap.get(sender) || { amount: BigInt(0), count: 0 };
-            senderMap.set(sender, {
-              amount: current.amount + BigInt(change.amount),
-              count: current.count + 1
-            });
+          if (typeof owner === 'string') {
+            const current = holderMap.get(owner) || BigInt(0);
+            holderMap.set(owner, current + BigInt(change.amount));
           }
         }
       }
     }
 
-    console.log('Found senders:', senderMap.size);
+    console.log('Found holders:', holderMap.size);
 
     // Convert to array and calculate percentages
-    const senders: TransactionSender[] = [];
-    const totalAmount = Array.from(senderMap.values()).reduce((sum, data) => sum + data.amount, BigInt(0));
+    const holders: TokenHolder[] = [];
+    const totalAmount = Array.from(holderMap.values()).reduce((sum, balance) => sum + balance, BigInt(0));
 
-    for (const [address, data] of senderMap.entries()) {
+    for (const [address, balance] of holderMap.entries()) {
       const percentage = totalAmount > 0 
-        ? Number((data.amount * BigInt(10000) / totalAmount)) / 100 
+        ? Number((balance * BigInt(10000) / totalAmount)) / 100 
         : 0;
 
-      senders.push({
+      holders.push({
         address,
-        totalAmount: data.amount.toString(),
-        transactionCount: data.count,
+        balance: balance.toString(),
         percentage
       });
     }
 
-    // Sort by total amount (descending) and take top senders
-    senders.sort((a, b) => {
-      const amountA = BigInt(a.totalAmount);
-      const amountB = BigInt(b.totalAmount);
-      return amountA > amountB ? -1 : amountA < amountB ? 1 : 0;
+    // Sort by balance (descending) and take top holders
+    holders.sort((a, b) => {
+      const balanceA = BigInt(a.balance);
+      const balanceB = BigInt(b.balance);
+      return balanceA > balanceB ? -1 : balanceA < balanceB ? 1 : 0;
     });
 
-    return senders.slice(0, limit);
+    return holders.slice(0, limit);
   } catch (error) {
-    console.error('Error fetching transaction senders:', error);
-    throw new Error('Failed to fetch transaction data');
+    console.error('Error fetching token holders:', error);
+    throw new Error('Failed to fetch token holder data');
   }
-};
-
-// Legacy function for backward compatibility - now returns empty array
-export const getTokenHolders = async (coinType: string, limit: number = 50): Promise<TokenHolder[]> => {
-  console.log('getTokenHolders called but deprecated for transaction analysis');
-  return [];
 };
 
 // Utility function to format balance with decimals
@@ -157,11 +142,6 @@ export const formatBalance = (balance: string, decimals: number): string => {
   const trimmedFractional = fractionalStr.replace(/0+$/, '');
   
   return trimmedFractional ? `${wholePart}.${trimmedFractional}` : wholePart.toString();
-};
-
-// Utility function to validate Sui address
-export const isValidSuiAddress = (address: string): boolean => {
-  return /^0x[a-fA-F0-9]{64}$/.test(address) || /^0x[a-fA-F0-9]{40}$/.test(address);
 };
 
 // Utility function to validate coin type
