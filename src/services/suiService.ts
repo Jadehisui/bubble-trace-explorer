@@ -148,3 +148,8 @@ export const formatBalance = (balance: string, decimals: number): string => {
 export const isValidCoinType = (coinType: string): boolean => {
   return /^0x[a-fA-F0-9]+::[a-zA-Z_][a-zA-Z0-9_]*::[a-zA-Z_][a-zA-Z0-9_]*$/.test(coinType);
 };
+
+// Utility function to validate Sui address
+export const isValidSuiAddress = (address: string): boolean => {
+  return /^0x[a-fA-F0-9]{64}$/.test(address);
+};
