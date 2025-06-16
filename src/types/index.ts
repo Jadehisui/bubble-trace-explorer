@@ -5,6 +5,7 @@ export interface Wallet {
   percentage: number;
   balance?: string;
   formattedBalance?: string;
+  transactionCount?: number;
   tag?: string;
   x: number;
   y: number;
@@ -17,6 +18,7 @@ export interface TokenData {
   decimals?: number;
   totalSupply?: string;
   coinType?: string;
+  targetAddress?: string;
   wallets: Wallet[];
 }
 

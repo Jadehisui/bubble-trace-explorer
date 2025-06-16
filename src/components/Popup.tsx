@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { PopupData } from '../types';
-import { Moon, ExternalLink } from 'lucide-react';
+import { TrendingUp, ExternalLink } from 'lucide-react';
 
 interface PopupProps {
   popup: PopupData;
@@ -43,9 +43,9 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Moon className="w-4 h-4 text-indigo-300" />
+              <TrendingUp className="w-4 h-4 text-indigo-300" />
               <span className="text-indigo-300 font-medium text-sm">
-                Token Holder
+                Transaction Sender
               </span>
             </div>
             <button
@@ -57,7 +57,7 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
           </div>
           
           <div>
-            <div className="text-slate-400 text-xs mb-1">Wallet Address</div>
+            <div className="text-slate-400 text-xs mb-1">Sender Address</div>
             <div 
               className="text-slate-100 font-mono text-sm bg-slate-950/50 px-2 py-1 rounded border border-slate-700/50 cursor-pointer hover:bg-slate-800/50 transition-colors"
               onClick={copyAddress}
@@ -69,21 +69,30 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
           
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <div className="text-slate-400 text-xs mb-1">Holdings %</div>
+              <div className="text-slate-400 text-xs mb-1">Amount Sent %</div>
               <div className="text-indigo-300 font-bold text-lg">
                 {popup.wallet.percentage.toFixed(2)}%
               </div>
             </div>
             
-            {popup.wallet.formattedBalance && (
+            {popup.wallet.transactionCount && (
               <div>
-                <div className="text-slate-400 text-xs mb-1">Balance</div>
+                <div className="text-slate-400 text-xs mb-1">Transactions</div>
                 <div className="text-slate-200 font-mono text-sm">
-                  {popup.wallet.formattedBalance}
+                  {popup.wallet.transactionCount}
                 </div>
               </div>
             )}
           </div>
+          
+          {popup.wallet.formattedBalance && (
+            <div>
+              <div className="text-slate-400 text-xs mb-1">Total Amount Sent</div>
+              <div className="text-slate-200 font-mono text-sm bg-slate-950/30 px-2 py-1 rounded">
+                {popup.wallet.formattedBalance}
+              </div>
+            </div>
+          )}
           
           <button
             onClick={handleExplorerClick}
