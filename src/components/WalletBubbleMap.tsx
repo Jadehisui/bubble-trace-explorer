@@ -79,9 +79,9 @@ export const WalletBubbleMap: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <TrendingUp className="w-8 h-8 text-slate-300" />
+           
             <h1 className="text-4xl font-bold text-slate-100 bg-gradient-to-r from-slate-200 via-indigo-200 to-slate-300 bg-clip-text text-transparent">
-              SUI TOKEN HOLDERS
+              SUI BUBBLE
             </h1>
             <Stars className="w-8 h-8 text-slate-300" />
           </div>
