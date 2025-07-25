@@ -1,7 +1,6 @@
-
-import React from 'react';
-import { PopupData } from '../types';
-import { TrendingUp, ExternalLink } from 'lucide-react';
+import React from "react";
+import { PopupData } from "../types";
+import { TrendingUp, ExternalLink } from "lucide-react";
 
 interface PopupProps {
   popup: PopupData;
@@ -16,7 +15,10 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
   };
 
   const handleExplorerClick = () => {
-    window.open(`https://suiscan.xyz/mainnet/account/${popup.wallet.address}`, '_blank');
+    window.open(
+      `https://suiscan.xyz/mainnet/account/${popup.wallet.address}`,
+      "_blank"
+    );
   };
 
   const copyAddress = () => {
@@ -26,18 +28,19 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/30 z-10 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Popup */}
-      <div 
-        className="absolute z-20 bg-slate-900/90 backdrop-blur-md border border-slate-600/50 
+      <div
+        className="fixed z-20 bg-slate-900/90 backdrop-blur-md border border-slate-600/50 
                    rounded-lg p-4 shadow-xl min-w-72 shadow-indigo-500/10"
         style={{
-          left: Math.min(popup.x + 10, window.innerWidth - 300),
-          top: Math.min(popup.y - 50, window.innerHeight - 200),
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
         }}
       >
         <div className="space-y-3">
@@ -55,10 +58,10 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
               ×
             </button>
           </div>
-          
+
           <div>
             <div className="text-slate-400 text-xs mb-1">Holder Address</div>
-            <div 
+            <div
               className="text-slate-100 font-mono text-sm bg-slate-950/50 px-2 py-1 rounded border border-slate-700/50 cursor-pointer hover:bg-slate-800/50 transition-colors"
               onClick={copyAddress}
               title="Click to copy address"
@@ -66,7 +69,7 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
               {shortenAddress(popup.wallet.address)}
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="text-slate-400 text-xs mb-1">Holdings %</div>
@@ -74,7 +77,7 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
                 {popup.wallet.percentage.toFixed(2)}%
               </div>
             </div>
-            
+
             <div>
               <div className="text-slate-400 text-xs mb-1">Rank</div>
               <div className="text-slate-200 font-mono text-sm">
@@ -82,7 +85,7 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
               </div>
             </div>
           </div>
-          
+
           {popup.wallet.formattedBalance && (
             <div>
               <div className="text-slate-400 text-xs mb-1">Token Balance</div>
@@ -91,7 +94,7 @@ export const Popup: React.FC<PopupProps> = ({ popup, onClose }) => {
               </div>
             </div>
           )}
-          
+
           <button
             onClick={handleExplorerClick}
             className="w-full mt-3 px-3 py-2 bg-indigo-600/80 hover:bg-indigo-500/80 
