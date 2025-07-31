@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Wallet, PopupData } from "../types";
 import { Popup } from "./Popup";
 
@@ -20,18 +20,20 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
   const [isDragging, setIsDragging] = useState(false);
   const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
+
+  const [initialPinchDistance, setInitialPinchDistance] = useState<
+    number | null
+  >(null);
+
   const svgRef = useRef<SVGSVGElement>(null);
 
   const getBubbleColor = (percentage: number) => {
-    if (percentage > 20)
-      return { base: "#ff4d4f", bright: "#ff7875", dark: "#7f1d1d" };
-    if (percentage > 10)
-      return { base: "#ffa940", bright: "#ffcc80", dark: "#7f501f" };
-    if (percentage > 5)
-      return { base: "#36cfc9", bright: "#70e0e8", dark: "#1b5f5e" };
-    if (percentage > 2)
-      return { base: "#40a9ff", bright: "#73c0ff", dark: "#1e429f" };
-    return { base: "#d3adf7", bright: "#e0c1ff", dark: "#6b4e91" };
+    if (percentage > 20) return { base: "#AE00FF" }; // Neon purple
+    if (percentage > 10) return { base: "#00FFD1" }; // Aqua / neon green-blue
+    if (percentage > 5) return { base: "#FFA940" }; // Orange-gold
+    if (percentage > 2) return { base: "#29B6F6" }; // Light sky blue (lighter & warmer than #00A2FF)
+    if (percentage > 1) return { base: "#B39DDB" }; // Deep violet (strong contrast with sky blue)
+    return { base: "#8f0f7eff" }; // Soft lilac (for very small bubbles)
   };
 
   const getBubbleRadius = (percentage: number) => {
@@ -75,13 +77,14 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
           const distance = Math.sqrt(dx * dx + dy * dy);
           const radiusA = getBubbleRadius(walletA.percentage);
           const radiusB = getBubbleRadius(walletB.percentage);
-          const minDistance = radiusA + radiusB + 10; // Increased padding to prevent overlap
+          const minDistance = radiusA + radiusB + 53;
+          // Increased padding to prevent overlap
 
           if (distance < minDistance) {
             moved = true;
             const overlap = minDistance - distance;
-            const adjustX = (dx / distance) * overlap * 0.5;
-            const adjustY = (dy / distance) * overlap * 0.5;
+            const adjustX = (dx / distance) * overlap * 0.2;
+            const adjustY = (dy / distance) * overlap * 0.1;
 
             walletA.x -= adjustX;
             walletA.y -= adjustY;
@@ -143,6 +146,61 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
     setIsDragging(false);
   }, []);
 
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    if (event.touches.length === 1) {
+      setIsDragging(true);
+      setLastPosition({
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+      });
+    }
+  }, []);
+
+  const handleTouchMove = useCallback(
+    (event: React.TouchEvent) => {
+      if (event.touches.length === 1 && isDragging) {
+        // Normal drag (one finger)
+        const deltaX = event.touches[0].clientX - lastPosition.x;
+        const deltaY = event.touches[0].clientY - lastPosition.y;
+
+        setTransform((prev) => ({
+          ...prev,
+          x: prev.x + deltaX,
+          y: prev.y + deltaY,
+        }));
+
+        setLastPosition({
+          x: event.touches[0].clientX,
+          y: event.touches[0].clientY,
+        });
+      }
+
+      // Pinch zoom (two fingers)
+      if (event.touches.length === 2) {
+        const dx = event.touches[0].clientX - event.touches[1].clientX;
+        const dy = event.touches[0].clientY - event.touches[1].clientY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (initialPinchDistance == null) {
+          setInitialPinchDistance(distance);
+        } else {
+          const scaleChange = distance / initialPinchDistance;
+          setTransform((prev) => ({
+            ...prev,
+            scale: Math.min(Math.max(prev.scale * scaleChange, 0.3), 5), // limit zoom level
+          }));
+          setInitialPinchDistance(distance);
+        }
+      }
+    },
+    [isDragging, lastPosition, initialPinchDistance]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    setIsDragging(false);
+    setInitialPinchDistance(null); // Reset zoom
+  }, []);
+
   const closePopup = () => {
     setPopup((prev) => ({ ...prev, visible: false }));
   };
@@ -176,13 +234,16 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
         <defs>
           <pattern
             id="star-pattern"
-            width="50"
-            height="50"
+            width="80"
+            height="80"
             patternUnits="userSpaceOnUse"
           >
-            <circle cx="10" cy="10" r="1" fill="#a5b4fc" opacity="0.3" />
-            <circle cx="40" cy="40" r="1.5" fill="#a5b4fc" opacity="0.2" />
-            <circle cx="25" cy="25" r="1" fill="#a5b4fc" opacity="0.4" />
+            <circle cx="10" cy="15" r="0.8" fill="#a5b4fc" opacity="0.3" />
+            <circle cx="30" cy="25" r="1.2" fill="#c4b5fd" opacity="0.2" />
+            <circle cx="50" cy="35" r="0.6" fill="#a5b4fc" opacity="0.4" />
+            <circle cx="70" cy="10" r="1.1" fill="#93c5fd" opacity="0.25" />
+            <circle cx="20" cy="60" r="1.4" fill="#f9a8d4" opacity="0.15" />
+            <circle cx="60" cy="50" r="0.9" fill="#c084fc" opacity="0.2" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill="url(#star-pattern)" />
@@ -213,48 +274,38 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
         ref={svgRef}
         width="100%"
         height="100%"
-        className="cursor-move relative"
+        className="cursor-move touch-none"
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <defs>
-          <radialGradient id="cosmic-glow" cx="50%" cy="50%" r="70%">
-            <stop offset="0%" stopColor="#818cf8" stopOpacity="0.5" />
-            <stop offset="60%" stopColor="#4f46e5" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#1e1b4b" stopOpacity="0" />
-          </radialGradient>
-          <marker
-            id="arrowhead"
-            markerWidth="6"
-            markerHeight="5"
-            refX="5"
-            refY="2.5"
-            orient="auto"
-          >
-            <polygon points="0 0, 6 2.5, 0 5" fill="#a5b4fc" />
-          </marker>
-          <marker
-            id="arrowhead-start"
-            markerWidth="6"
-            markerHeight="5"
-            refX="1"
-            refY="2.5"
-            orient="auto-start-reverse"
-          >
-            <polygon points="6 0, 0 2.5, 6 5" fill="#a5b4fc" />
-          </marker>
-          <marker
-            id="arrowhead-end"
-            markerWidth="6"
-            markerHeight="5"
-            refX="5"
-            refY="2.5"
-            orient="auto"
-          >
-            <polygon points="0 0, 6 2.5, 0 5" fill="#a5b4fc" />
-          </marker>
+          <filter id="bubble-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          {adjustedWallets.map((wallet) => {
+            const colors = getBubbleColor(wallet.percentage);
+            return (
+              <radialGradient
+                key={wallet.id}
+                id={`gradient-${wallet.id}`}
+                cx="50%"
+                cy="50%"
+                r="50%"
+              >
+                <stop offset="0%" stopColor={colors.base} stopOpacity="0.6" />
+                <stop offset="100%" stopColor={colors.base} stopOpacity="0.1" />
+              </radialGradient>
+            );
+          })}
         </defs>
 
         <g
@@ -275,11 +326,16 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
               const length = Math.sqrt(dx * dx + dy * dy);
               const angle = Math.atan2(dy, dx);
 
+              const arrowOffset = 6;
               // Calculate edge points (where the line should start/end at the bubble edges)
-              const edgeX1 = wallet.x + radiusA * Math.cos(angle);
-              const edgeY1 = wallet.y + radiusA * Math.sin(angle);
-              const edgeX2 = connectedWallet.x - radiusB * Math.cos(angle);
-              const edgeY2 = connectedWallet.y - radiusB * Math.sin(angle);
+              const edgeX1 =
+                wallet.x + (radiusA + arrowOffset) * Math.cos(angle);
+              const edgeY1 =
+                wallet.y + (radiusA + arrowOffset) * Math.sin(angle);
+              const edgeX2 =
+                connectedWallet.x - (radiusB + arrowOffset) * Math.cos(angle);
+              const edgeY2 =
+                connectedWallet.y - (radiusB + arrowOffset) * Math.sin(angle);
 
               // Calculate midpoint for the arrow
               const midX = (edgeX1 + edgeX2) / 2;
@@ -287,18 +343,44 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
 
               return (
                 <g key={`${wallet.id}-${connectionId}`}>
+                  <defs>
+                    <marker
+                      id="arrow-end"
+                      markerWidth="6"
+                      markerHeight="6"
+                      refX="5"
+                      refY="3"
+                      orient="auto"
+                      markerUnits="strokeWidth"
+                    >
+                      <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,0.6)" />
+                    </marker>
+
+                    <marker
+                      id="arrow-start"
+                      markerWidth="6"
+                      markerHeight="6"
+                      refX="1"
+                      refY="3"
+                      orient="auto-start-reverse"
+                      markerUnits="strokeWidth"
+                    >
+                      <path d="M0,0 L6,3 L0,6 Z" fill="rgba(255,255,255,0.6)" />
+                    </marker>
+                  </defs>
+
                   <line
                     x1={edgeX1}
                     y1={edgeY1}
                     x2={edgeX2}
                     y2={edgeY2}
-                    stroke="#a5b4fc"
-                    strokeWidth="1.5"
-                    strokeDasharray={length > 200 ? "3,3" : "0"}
-                    markerStart="url(#arrowhead-start)"
-                    markerEnd="url(#arrowhead-end)"
-                    opacity="0.6"
+                    stroke="rgba(255,255,255,0.4)"
+                    strokeWidth="1.2"
+                    markerStart="url(#arrow-start)"
+                    markerEnd="url(#arrow-end)"
+                    style={{ filter: "drop-shadow(0 0 1px #fff)" }}
                   />
+
                   {length > 200 && (
                     <line
                       x1={midX - 10 * Math.cos(angle)}
@@ -308,7 +390,7 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
                       stroke="#a5b4fc"
                       strokeWidth="2"
                       markerEnd="url(#arrowhead-end)"
-                      opacity="0.6"
+                      opacity="0.9"
                     />
                   )}
                 </g>
@@ -337,33 +419,36 @@ export const BubbleMap: React.FC<BubbleMapProps> = ({
                   cx={wallet.x}
                   cy={wallet.y}
                   r={radius}
-                  fill={colors.base}
-                  stroke="#e2e8f0"
-                  strokeWidth="1.5"
-                  opacity="0.85"
-                  className="cursor-pointer transition-all duration-300"
+                  fill={`url(#gradient-${wallet.id})`}
+                  stroke="#94a3b8" // Add a soft stroke
+                  strokeWidth="1"
                   style={{
-                    transformOrigin: "center",
-                    transformBox: "fill-box",
+                    filter:
+                      "drop-shadow(0 0 4px rgba(165, 180, 252, 0.3)) drop-shadow(0 0 10px rgba(165, 180, 252, 0.2))",
+                    transition: "all 0.3s ease-in-out",
+                    cursor: "pointer",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.1)";
-                    e.currentTarget.style.stroke = "#a5b4fc";
+                    // e.currentTarget.style.transform = "scale(1.15)";
+                    e.currentTarget.style.filter =
+                      "drop-shadow(0 0 12px rgba(165, 180, 252, 1)) drop-shadow(0 0 25px rgba(165, 180, 252, 0.9))";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = "scale(1)";
-                    e.currentTarget.style.stroke = "#e2e8f0";
+                    e.currentTarget.style.filter =
+                      "drop-shadow(0 0 8px rgba(165, 180, 252, 0.5)) drop-shadow(0 0 15px rgba(165, 180, 252, 0.3))";
                   }}
                   onClick={(e) => handleBubbleClick(wallet, e)}
                 />
-                <circle
+
+                {/* <circle
                   cx={wallet.x}
                   cy={wallet.y}
                   r={radius * 0.5}
-                  fill={colors.dark}
+                  fill={colors.base}
                   opacity="0.9"
                   pointerEvents="none"
-                />
+                /> */}
                 <text
                   x={wallet.x}
                   y={wallet.y}
